@@ -56,8 +56,8 @@
                         <button onclick="route2()">Trasa 2</button>
                         <button onclick="route3()">Trasa 3</button>
                     </div>
-                    <div style="margin: 10px;">
-                        <button>Zapisz wybraną trasę</button>
+                    <div style="padding: 50px;">
+                        <button onclick="saveRoute()">Zapisz aktualną trasę</button>
                     </div>
                 </div>
             </div>
@@ -70,8 +70,11 @@
             crossorigin="">
         </script>
         <script>
-            //map setup
+            //map setup + inicjacja zmiennych
             let map = L.map('map').setView([49.78403, 19.05729], 16);
+            let marker = null;
+            let markerStart = null;
+            let currentRouteArray = null;
 
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -84,12 +87,19 @@
             if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(function(position){
                     let coords = position.coords;
-                    let marker = L.marker([coords.latitude, coords.longitude]).addTo(map);
+
+                    markerStart = L.marker([coords.latitude, coords.longitude]).addTo(map);
                 });
             }
 
             function onMapClick(e){
-                let marker = L.marker(e.latlng).addTo(map);
+                if(marker){
+                    marker.remove();
+                }
+
+                marker = L.marker(e.latlng).addTo(map);
+
+                createNewRoute(e.latlng);
 
                 marker.on('click', function () {
                     marker.remove();
@@ -101,6 +111,30 @@
             //rysowanie trasy
             let currentRoute = null;
 
+            async function createNewRoute(){
+                currentRouteArray = [];
+                clearRoute();
+
+                let location = `${markerStart.getLatLng().lng},${markerStart.getLatLng().lat};${marker.getLatLng().lng},${marker.getLatLng().lat}`;
+                let requestString = 'https://router.project-osrm.org/route/v1/driving/' + location + '?steps=true&annotations=true&geometries=geojson&overview=full';
+
+                const response = await fetch(requestString, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(responseBody => {
+                    const routesArray = responseBody.routes[0].geometry.coordinates;
+
+                    for(let i=0; i <= routesArray.length - 1; i++){
+                        currentRouteArray.push([routesArray[i][1], routesArray[i][0]]);
+                    }
+
+                    currentRoute = L.polyline(currentRouteArray, {color: 'green'}).addTo(map);
+                })
+                .catch(error => console.error("Error while getting a response.", error));
+            }
+
             //obsługa helpWindow
             function clearRoute(){
                 if(currentRoute){
@@ -109,97 +143,26 @@
             }
 
             function route1(){
-                if(currentRoute){
-                    currentRoute.remove();
-                }
+                clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
             function route2(){
-                if(currentRoute){
-                    currentRoute.remove();
-                }
-
-                let latlngs = [
-                    [
-                        49.784232,
-                        19.057522
-                    ],
-                    [
-                        49.784331,
-                        19.057647
-                    ],
-                    [
-                        49.784447,
-                        19.057795
-                    ],
-                    [
-                        49.784735,
-                        19.057253
-                    ],
-                    [
-                        49.784778,
-                        19.057173
-                    ],
-                    [
-                        48.784914,
-                        19.056927
-                    ],
-                    [
-                        49.822484,
-                        19.045002
-                    ],
-                    [
-                        49.829908,
-                        19.044554
-                    ]
-                ];
+                clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
             function route3(){
-                if(currentRoute){
-                    currentRoute.remove();
-                }
-
-                let latlngs = [
-                    [
-                        49.784232,
-                        19.057522
-                    ],
-                    [
-                        49.784331,
-                        19.057647
-                    ],
-                    [
-                        49.784447,
-                        19.057795
-                    ],
-                    [
-                        49.784735,
-                        19.057253
-                    ],
-                    [
-                        49.784778,
-                        19.057173
-                    ],
-                    [
-                        49.784914,
-                        19.056927
-                    ],
-                    [
-                        49.822484,
-                        19.045002
-                    ],
-                    [
-                        49.829908,
-                        19.044554
-                    ]
-                ];
+                clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
+            }
+
+            function saveRoute(){
+                //logika zapisu
+                alert("Zapisano!");
             }
 
         </script>
