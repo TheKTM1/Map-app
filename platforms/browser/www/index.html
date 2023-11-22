@@ -58,6 +58,7 @@
                     </div>
                     <div style="padding: 50px;">
                         <button onclick="saveRoute()">Zapisz aktualną trasę</button>
+                        <button onclick="loadRoute()" style="margin-top: 5px;">Wczytaj trasę...</button>
                     </div>
                 </div>
             </div>
@@ -131,6 +132,12 @@
                     }
 
                     currentRoute = L.polyline(currentRouteArray, {color: 'green'}).addTo(map);
+                    // console.log(JSON.stringify(currentRouteArray));
+                    // fs.writeFile("routes.json", JSON.stringify(currentRouteArray), function(err){
+                    //     if(err){
+                    //         console.error(err);
+                    //     }
+                    // });
                 })
                 .catch(error => console.error("Error while getting a response.", error));
             }
@@ -163,6 +170,10 @@
             function saveRoute(){
                 //logika zapisu
                 alert("Zapisano!");
+            }
+
+            function loadRoute(){
+                //logika odczytu
             }
 
         </script>
