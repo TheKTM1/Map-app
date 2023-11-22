@@ -46,22 +46,32 @@
 
                 </div>
             </div>
-            <div id="helpWindow" style="width:300px;height:300px;position:absolute;left:calc(100% - 300px);top:0;z-index:500;">
+            <div id="helpWindow" style="width:300px;height:300px;position:absolute;left:calc(100% - 300px);top:0;z-index:500;overflow: hidden;">
                 <div style="width: 100%;height: 100%;background-color: black;border-radius: 10px;opacity: 0.5;"></div>
-                <div style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;">
-                    ABC
+                <div style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
+                    <div>
+                        Predefiniowane trasy:<br/>
+                        <button onclick="clearRoute()">Brak</button>
+                        <button onclick="route1()">Trasa 1</button>
+                        <button onclick="route2()">Trasa 2</button>
+                        <button onclick="route3()">Trasa 3</button>
+                    </div>
+                    <div style="margin: 10px;">
+                        <button>Zapisz wybraną trasę</button>
+                    </div>
                 </div>
             </div>
         </div>
         <script src="cordova.js"></script>
         <script src="js/index.js"></script>
+        <script src="routes.js"></script>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin="">
         </script>
         <script>
             //map setup
-            let map = L.map('map').setView([49.78403, 19.05729], 14);
+            let map = L.map('map').setView([49.78403, 19.05729], 16);
 
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -71,6 +81,13 @@
             //let marker = L.marker([49.78403, 19.05729]).addTo(map);
 
             //obsługa interakcji z mapą
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function(position){
+                    let coords = position.coords;
+                    let marker = L.marker([coords.latitude, coords.longitude]).addTo(map);
+                });
+            }
+
             function onMapClick(e){
                 let marker = L.marker(e.latlng).addTo(map);
 
@@ -82,44 +99,108 @@
             map.on('click', onMapClick);
 
             //rysowanie trasy
-            let latlngs = [
-                [
-                    49.784232,
-                    19.057522
-                ],
-                [
-                    49.784331,
-                    19.057647
-                ],
-                [
-                    49.784447,
-                    19.057795
-                ],
-                [
-                    49.784735,
-                    19.057253
-                ],
-                [
-                    49.784778,
-                    19.057173
-                ],
-                [
-                    49.784914,
-                    19.056927
-                ],
-                [
-                    49.822484,
-                    19.045002
-                ],
-                [
-                    49.829908,
-                    19.044554
-                ]
-            ];
-
-            let route = L.polyline(latlngs, {color: 'green'}).addTo(map);
+            let currentRoute = null;
 
             //obsługa helpWindow
+            function clearRoute(){
+                if(currentRoute){
+                    currentRoute.remove();
+                }
+            }
+
+            function route1(){
+                if(currentRoute){
+                    currentRoute.remove();
+                }
+
+                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
+            }
+
+            function route2(){
+                if(currentRoute){
+                    currentRoute.remove();
+                }
+
+                let latlngs = [
+                    [
+                        49.784232,
+                        19.057522
+                    ],
+                    [
+                        49.784331,
+                        19.057647
+                    ],
+                    [
+                        49.784447,
+                        19.057795
+                    ],
+                    [
+                        49.784735,
+                        19.057253
+                    ],
+                    [
+                        49.784778,
+                        19.057173
+                    ],
+                    [
+                        48.784914,
+                        19.056927
+                    ],
+                    [
+                        49.822484,
+                        19.045002
+                    ],
+                    [
+                        49.829908,
+                        19.044554
+                    ]
+                ];
+
+                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
+            }
+
+            function route3(){
+                if(currentRoute){
+                    currentRoute.remove();
+                }
+
+                let latlngs = [
+                    [
+                        49.784232,
+                        19.057522
+                    ],
+                    [
+                        49.784331,
+                        19.057647
+                    ],
+                    [
+                        49.784447,
+                        19.057795
+                    ],
+                    [
+                        49.784735,
+                        19.057253
+                    ],
+                    [
+                        49.784778,
+                        19.057173
+                    ],
+                    [
+                        49.784914,
+                        19.056927
+                    ],
+                    [
+                        49.822484,
+                        19.045002
+                    ],
+                    [
+                        49.829908,
+                        19.044554
+                    ]
+                ];
+
+                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
+            }
 
         </script>
     </body>
