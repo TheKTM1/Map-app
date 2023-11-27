@@ -117,11 +117,12 @@
                 clearRoute();
 
                 let location = `${markerStart.getLatLng().lng},${markerStart.getLatLng().lat};${marker.getLatLng().lng},${marker.getLatLng().lat}`;
-                let requestString = 'https://router.project-osrm.org/route/v1/driving/' + location + '?steps=true&annotations=true&geometries=geojson&overview=full';
+                let requestString = 'http://localhost:7070/api/find-route';
 
                 const response = await fetch(requestString, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'}
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({location: location}),
                 })
                 .then(response => response.json())
                 .then(responseBody => {
