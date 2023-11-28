@@ -1,33 +1,7 @@
 <!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
     <head>
         <meta charset="utf-8">
-        <!--
-        Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
-            https://cordova.apache.org/docs/en/latest/
-        Some notes:
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
         <meta http-equiv="Content-Security-Policy" content="">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
@@ -46,19 +20,20 @@
 
                 </div>
             </div>
-            <div id="helpWindow" style="width:300px;height:300px;position:absolute;left:calc(100% - 300px);top:0;z-index:500;overflow: hidden;">
-                <div style="width: 100%;height: 100%;background-color: black;border-radius: 10px;opacity: 0.5;"></div>
+            <div id="helpWindow" style="width:100%;height:200px;position:absolute;left:0;top:calc(100% - 200px);z-index:500;overflow: hidden;">
+                <div style="width: 100%;height: 100%;background-color: black;opacity: 0.5;"></div>
                 <div style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
                     <div>
-                        Predefiniowane trasy:<br/>
-                        <button onclick="clearRoute()">Brak</button>
-                        <button onclick="route1()">Trasa 1</button>
-                        <button onclick="route2()">Trasa 2</button>
-                        <button onclick="route3()">Trasa 3</button>
+                        Wczytane punkty:<br/>
+                        <!-- <button onclick="clearRoute()">Brak</button> -->
+                        <button onclick="predefined1()">UBB</button>
+                        <button onclick="predefined2()">Dworzec PKP</button>
+                        <button onclick="predefined3()">Lotnisko</button>
                     </div>
                     <div style="padding: 50px;">
-                        <button onclick="saveRoute()">Zapisz aktualną trasę</button>
-                        <button onclick="loadRoute()" style="margin-top: 5px;">Wczytaj trasę...</button>
+                        Inne akcje: <br/>
+                        <!-- <button onclick="saveMarker()">Zapisz aktualny punkt docelowy</button> -->
+                        <button onclick="loadMarker()" style="margin-top: 5px;">Wczytaj punkt...</button>
                     </div>
                 </div>
             </div>
@@ -82,14 +57,14 @@
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
-            //let marker = L.marker([49.78403, 19.05729]).addTo(map);
-
             //obsługa interakcji z mapą
             if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(function(position){
                     let coords = position.coords;
 
+                    map.setView([coords.latitude, coords.longitude]);
                     markerStart = L.marker([coords.latitude, coords.longitude]).addTo(map);
+                    markerStart.bindPopup(`Obecne położenie: [${markerStart.getLatLng().lat}, ${markerStart.getLatLng().lng}]`);
                 });
             }
 
@@ -97,13 +72,18 @@
                 if(marker){
                     marker.remove();
                 }
+                if(currentRouteArray){
+                    clearRoute();
+                    currentRouteArray = [];
+                }
 
                 marker = L.marker(e.latlng).addTo(map);
 
-                createNewRoute(e.latlng);
+                // createNewRoute(e.latlng);
 
                 marker.on('click', function () {
-                    marker.remove();
+                    const popupData = `<a onclick="createNewRoute()" style="text-decoration:underline;cursor:pointer;">Stwórz trasę</a><br/><a onclick="openSaveWindow()" style="text-decoration:underline;cursor:pointer;">Zapisz znacznik</a>`;
+                    marker.bindPopup(popupData);
                 });
             }
 
@@ -133,12 +113,6 @@
                     }
 
                     currentRoute = L.polyline(currentRouteArray, {color: 'green'}).addTo(map);
-                    // console.log(JSON.stringify(currentRouteArray));
-                    // fs.writeFile("routes.json", JSON.stringify(currentRouteArray), function(err){
-                    //     if(err){
-                    //         console.error(err);
-                    //     }
-                    // });
                 })
                 .catch(error => console.error("Error while getting a response.", error));
             }
@@ -150,30 +124,34 @@
                 }
             }
 
-            function route1(){
+            function predefined1(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function route2(){
+            function predefined2(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function route3(){
+            function predefined3(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function saveRoute(){
+            function openSaveWindow(){
+                alert("działa");
+            }
+
+            function saveMarker(){
                 //logika zapisu
                 alert("Zapisano!");
             }
 
-            function loadRoute(){
+            function loadMarker(){
                 //logika odczytu
             }
 
