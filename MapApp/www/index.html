@@ -20,19 +20,20 @@
 
                 </div>
             </div>
-            <div id="helpWindow" style="width:300px;height:300px;position:absolute;left:calc(100% - 300px);top:0;z-index:500;overflow: hidden;">
-                <div style="width: 100%;height: 100%;background-color: black;border-radius: 10px;opacity: 0.5;"></div>
+            <div id="helpWindow" style="width:100%;height:200px;position:absolute;left:0;top:calc(100% - 200px);z-index:500;overflow: hidden;">
+                <div style="width: 100%;height: 100%;background-color: black;opacity: 0.5;"></div>
                 <div style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
                     <div>
                         Predefiniowane punkty:<br/>
-                        <button onclick="clearRoute()">Brak</button>
-                        <button onclick="route1()">UBB</button>
-                        <button onclick="route2()">Dworzec PKP</button>
-                        <button onclick="route3()">Lotnisko</button>
+                        <!-- <button onclick="clearRoute()">Brak</button> -->
+                        <button onclick="predefined1()">UBB</button>
+                        <button onclick="predefined2()">Dworzec PKP</button>
+                        <button onclick="predefined3()">Lotnisko</button>
                     </div>
                     <div style="padding: 50px;">
-                        <button onclick="saveRoute()">Zapisz aktualny punkt docelowy</button>
-                        <button onclick="loadRoute()" style="margin-top: 5px;">Wczytaj punkt...</button>
+                        Inne akcje: <br/>
+                        <!-- <button onclick="saveMarker()">Zapisz aktualny punkt docelowy</button> -->
+                        <button onclick="loadMarker()" style="margin-top: 5px;">Wczytaj punkt...</button>
                     </div>
                 </div>
             </div>
@@ -71,13 +72,18 @@
                 if(marker){
                     marker.remove();
                 }
+                if(currentRouteArray){
+                    clearRoute();
+                    currentRouteArray = [];
+                }
 
                 marker = L.marker(e.latlng).addTo(map);
 
-                createNewRoute(e.latlng);
+                // createNewRoute(e.latlng);
 
                 marker.on('click', function () {
-                    marker.bindPopup('<a href="abc">Zapisz znacznik</a>');
+                    const popupData = `<a onclick="createNewRoute()" style="text-decoration:underline;cursor:pointer;">Stwórz trasę</a><br/><a onclick="openSaveWindow()" style="text-decoration:underline;cursor:pointer;">Zapisz znacznik</a>`;
+                    marker.bindPopup(popupData);
                 });
             }
 
@@ -118,30 +124,34 @@
                 }
             }
 
-            function route1(){
+            function predefined1(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function route2(){
+            function predefined2(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function route3(){
+            function predefined3(){
                 clearRoute();
 
                 currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
-            function saveRoute(){
+            function openSaveWindow(){
+                alert("działa");
+            }
+
+            function saveMarker(){
                 //logika zapisu
                 alert("Zapisano!");
             }
 
-            function loadRoute(){
+            function loadMarker(){
                 //logika odczytu
             }
 
