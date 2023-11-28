@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
+import { readFileSync, writeFileSync } from 'fs';
 
 @Controller('api')
 export class AppController {
@@ -17,5 +18,38 @@ export class AppController {
     });
 
     return response.json();
+  }
+
+  @Post('save-marker')
+  async saveMarker(
+    @Body('latlng') latlng: string,
+    @Body('name') name: string,
+    @Body('desc') desc: string,
+  ){
+    let markerFile = readFileSync('./src/markers.txt', 'utf8');
+
+    const markersJson = markerFile === '' ? {} : JSON.parse(markerFile);
+
+    markersJson[Object.keys(markersJson).length] = {
+      "latlng": latlng,
+      "name": name,
+      "desc": desc,
+    };
+
+    const markersString = JSON.stringify(markersJson);
+
+    writeFileSync('./src/markers.txt', markersString);
+
+    return;
+  }
+
+  @Get('load-markers')
+  async loadMarkers(){
+
+    let markerFile = readFileSync('./src/markers.txt', 'utf8');
+
+    if(markerFile != ''){
+      return markerFile;
+    }
   }
 }

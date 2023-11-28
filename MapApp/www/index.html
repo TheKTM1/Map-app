@@ -22,7 +22,7 @@
             </div>
             <div id="helpWindow" style="width:100%;height:200px;position:absolute;left:0;top:calc(100% - 200px);z-index:500;overflow: hidden;">
                 <div style="width: 100%;height: 100%;background-color: black;opacity: 0.5;"></div>
-                <div style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
+                <div id="helpWindowMain" style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
                     <div>
                         Wczytane punkty:<br/>
                         <!-- <button onclick="clearRoute()">Brak</button> -->
@@ -33,8 +33,16 @@
                     <div style="padding: 50px;">
                         Inne akcje: <br/>
                         <!-- <button onclick="saveMarker()">Zapisz aktualny punkt docelowy</button> -->
-                        <button onclick="loadMarker()" style="margin-top: 5px;">Wczytaj punkt...</button>
+                        <button onclick="loadMarkers()" style="margin-top: 5px;">Wczytaj punkt...</button>
                     </div>
+                </div>
+                <div id="helpWindowSave" style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;display:none;">
+                    <form id="saveForm">
+                        <p id="coordsToSave"></p>
+                        <input type="text" placeholder="Nazwa" style="width: 200px;"/><br/>
+                        <textarea placeholder="Opis" style="width:200px;margin: 10px 0 10px 0;"></textarea><br/>
+                        <button type="button" onclick="saveMarker()">Zapisz znacznik</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -143,16 +151,47 @@
             }
 
             function openSaveWindow(){
-                alert("działa");
+                document.getElementById('helpWindowMain').style.display = "none";
+                document.getElementById('helpWindowSave').style.display = "block";
+                document.getElementById('coordsToSave').innerHTML = `Koordynaty: ${marker.getLatLng().lat}, ${marker.getLatLng().lng}`;
             }
 
-            function saveMarker(){
-                //logika zapisu
-                alert("Zapisano!");
+            async function saveMarker(){
+                let form = document.getElementById("saveForm");
+
+                if(form.elements[0].value == ''){
+                    alert("Uzupełnij nazwę znacznika.");
+                    return;
+                }
+
+                const response = await fetch('http://localhost:7070/api/save-marker', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        latlng: `${marker.getLatLng().lat}, ${marker.getLatLng().lng}`,
+                        name: form.elements[0].value,
+                        desc: form.elements[1].value
+                    }),
+                });
+
+                if(response.ok){
+                    document.getElementById('helpWindowMain').style.display = "block";
+                    document.getElementById('helpWindowSave').style.display = "none";
+                    alert("Zapisano.");
+                } else {
+                    console.error("Podczas zapisywania nastąpił błąd.");
+                }
             }
 
-            function loadMarker(){
-                //logika odczytu
+            async function loadMarkers(){
+                const response = await fetch('http://localhost:7070/api/load-markers')
+                .then(response => response.json())
+                .then(markerData => {
+                    console.log(markerData);
+                })
+                .catch(e => {
+                    console.error(e);
+                });
             }
 
         </script>
