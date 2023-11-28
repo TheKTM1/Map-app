@@ -183,8 +183,15 @@
                 }
             }
 
-            function loadMarkers(){
-                //logika odczytu
+            async function loadMarkers(){
+                const response = await fetch('http://localhost:7070/api/load-markers')
+                .then(response => response.json())
+                .then(markerData => {
+                    console.log(markerData);
+                })
+                .catch(e => {
+                    console.error(e);
+                });
             }
 
         </script>

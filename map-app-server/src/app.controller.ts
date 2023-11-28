@@ -43,10 +43,13 @@ export class AppController {
     return;
   }
 
-  @Post('load-markers')
-  async loadMarkers(
+  @Get('load-markers')
+  async loadMarkers(){
 
-  ){
+    let markerFile = readFileSync('./src/markers.txt', 'utf8');
 
+    if(markerFile != ''){
+      return markerFile;
+    }
   }
 }
