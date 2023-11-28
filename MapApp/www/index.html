@@ -175,7 +175,9 @@
                 });
 
                 if(response.ok){
-                    console.log("Zapisano.");
+                    document.getElementById('helpWindowMain').style.display = "block";
+                    document.getElementById('helpWindowSave').style.display = "none";
+                    alert("Zapisano.");
                 } else {
                     console.error("Podczas zapisywania nastąpił błąd.");
                 }
