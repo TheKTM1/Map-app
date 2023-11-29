@@ -23,17 +23,12 @@
             <div id="helpWindow" style="width:100%;height:200px;position:absolute;left:0;top:calc(100% - 200px);z-index:500;overflow: hidden;">
                 <div style="width: 100%;height: 100%;background-color: black;opacity: 0.5;"></div>
                 <div id="helpWindowMain" style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;">
-                    <div>
-                        Wczytane punkty:<br/>
-                        <!-- <button onclick="clearRoute()">Brak</button> -->
-                        <button onclick="predefined1()">UBB</button>
-                        <button onclick="predefined2()">Dworzec PKP</button>
-                        <button onclick="predefined3()">Lotnisko</button>
+                    <div style="margin: 10px 0 10px 0;">
+                        <button onclick="loadMarkers()" style="">Wczytaj punkt...</button>
                     </div>
-                    <div style="padding: 50px;">
-                        Inne akcje: <br/>
-                        <!-- <button onclick="saveMarker()">Zapisz aktualny punkt docelowy</button> -->
-                        <button onclick="loadMarkers()" style="margin-top: 5px;">Wczytaj punkt...</button>
+                    <div id="loadedPoints" style="display:none;">
+                        Wczytane punkty:<br/>
+                        <div id="loadedButtons"></div>
                     </div>
                 </div>
                 <div id="helpWindowSave" style="width: 100%;height: 100%;position: absolute;left: 0; top: 0;margin: 10px;text-align: center;display:none;">
@@ -59,6 +54,7 @@
             let marker = null;
             let markerStart = null;
             let currentRouteArray = null;
+            let markerData = {};
 
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -86,8 +82,6 @@
                 }
 
                 marker = L.marker(e.latlng).addTo(map);
-
-                // createNewRoute(e.latlng);
 
                 marker.on('click', function () {
                     const popupData = `<a onclick="createNewRoute()" style="text-decoration:underline;cursor:pointer;">Stwórz trasę</a><br/><a onclick="openSaveWindow()" style="text-decoration:underline;cursor:pointer;">Zapisz znacznik</a>`;
@@ -132,22 +126,19 @@
                 }
             }
 
-            function predefined1(){
+            function createMarker(key){
                 clearRoute();
 
-                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
-            }
+                if(marker){
+                    marker.remove();
+                }
 
-            function predefined2(){
-                clearRoute();
+                marker = L.marker([markerData[key].lat, markerData[key].lng]).addTo(map);
+                marker.on('click', function () {
+                    const popupData = `<p>${markerData[key].name}</p><p>${markerData[key].desc}</p><a onclick="createNewRoute()" style="text-decoration:underline;cursor:pointer;">Stwórz trasę</a>`;
+                    marker.bindPopup(popupData);
+                });
 
-                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
-            }
-
-            function predefined3(){
-                clearRoute();
-
-                currentRoute = L.polyline(latlngs, {color: 'green'}).addTo(map);
             }
 
             function openSaveWindow(){
@@ -168,7 +159,8 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        latlng: `${marker.getLatLng().lat}, ${marker.getLatLng().lng}`,
+                        lat: marker.getLatLng().lat,
+                        lng: marker.getLatLng().lng,
                         name: form.elements[0].value,
                         desc: form.elements[1].value
                     }),
@@ -177,6 +169,9 @@
                 if(response.ok){
                     document.getElementById('helpWindowMain').style.display = "block";
                     document.getElementById('helpWindowSave').style.display = "none";
+
+                    form.elements[0].value = '';
+                    form.elements[1].value = '';
                     alert("Zapisano.");
                 } else {
                     console.error("Podczas zapisywania nastąpił błąd.");
@@ -184,10 +179,27 @@
             }
 
             async function loadMarkers(){
+
+                if(markerData != {}){
+                    document.getElementById("loadedButtons").innerHTML = "";
+                }
+
                 const response = await fetch('http://localhost:7070/api/load-markers')
                 .then(response => response.json())
-                .then(markerData => {
-                    console.log(markerData);
+                .then(markersData => {
+                    markerData = markersData;
+
+                    Object.keys(markerData).forEach(function(key) {
+                        let button = document.createElement("button");
+
+                        button.innerHTML = markerData[key].name;
+                        button.onclick = function(){
+                            createMarker(key);
+                        };
+
+                        document.getElementById("loadedButtons").appendChild(button);
+                        document.getElementById("loadedPoints").style.display = "block";
+                    });
                 })
                 .catch(e => {
                     console.error(e);
@@ -195,5 +207,11 @@
             }
 
         </script>
+        <style>
+            .leaflet-popup-content{
+                text-transform: none;
+                text-align: center;
+            }
+        </style>
     </body>
 </html>

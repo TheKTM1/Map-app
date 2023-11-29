@@ -22,7 +22,8 @@ export class AppController {
 
   @Post('save-marker')
   async saveMarker(
-    @Body('latlng') latlng: string,
+    @Body('lat') lat: number,
+    @Body('lng') lng: number,
     @Body('name') name: string,
     @Body('desc') desc: string,
   ){
@@ -31,7 +32,8 @@ export class AppController {
     const markersJson = markerFile === '' ? {} : JSON.parse(markerFile);
 
     markersJson[Object.keys(markersJson).length] = {
-      "latlng": latlng,
+      "lat": lat,
+      "lng": lng,
       "name": name,
       "desc": desc,
     };
